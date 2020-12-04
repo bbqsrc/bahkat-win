@@ -15,7 +15,7 @@ jobs:
         with:
           key: ${{ secrets.DIVVUN_KEY }}
       - name: Setup NuGet
-        uses: NuGet/setup-nuget@v1.0.2
+        uses: NuGet/setup-nuget@v1
         with:
           nuget-version: '5.x'
       - name: Nerdbank.GitVersioning
