@@ -56,8 +56,6 @@ jobs:
       - name: Install Pahkat Service installer
         run: |
           ./pahkat-service-setup.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
-      - name: Install WinAppDriver
-        run: choco install winappdriver
       - name: Start WinAppDriver
         run: |
           pushd "C:\Program Files (x86)\Windows Application Driver"
