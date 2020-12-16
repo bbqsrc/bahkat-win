@@ -24,6 +24,10 @@ SignedUninstaller=yes
 SignTool=signtool
 MinVersion=6.3.9200                 
 
+[CustomMessages]
+InstallingDotNetMsg=Installing .NET 5 libraries (this may take a while)...
+InstallingPahkatService=Installing Pahkat Service (this may take a while)...
+
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "armenian"; MessagesFile: "compiler:Languages\Armenian.isl"
@@ -55,6 +59,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: "Divvun.Installer\bin\x86\Release\net5.0-windows\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs uninsrestartdelete
 Source: "pahkat-service-setup.exe"; DestDir: "{app}"; Flags: deleteafterinstall dontcopy
+Source: "dotnet5-webinst.exe"; DestDir: "{app}"; Flags: deleteafterinstall dontcopy
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall runasoriginaluser skipifsilent
@@ -151,12 +156,26 @@ end;
 function PrepareToInstall(var NeedsRestart: Boolean): String;
 var
   ResultCode: Integer;
+  WasVisible: Boolean;
 begin
     // Uninstall Divvun Installer if it exists
     UninstallDivvunInstaller();
     RemoveOldStartMenuItems();
     
-    // Run embedded Pahkat Service installer
-    ExtractTemporaryFile('pahkat-service-setup.exe');
-    Exec(ExpandConstant('{tmp}\pahkat-service-setup.exe'), '/VERYSILENT /SP- /SUPPRESSMSGBOXES /NORESTART', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    try
+      WizardForm.PreparingLabel.Visible := True;
+
+      // Run embedded Pahkat Service installer
+      WizardForm.PreparingLabel.Caption := CustomMessage('InstallingPahkatService');
+      ExtractTemporaryFile('pahkat-service-setup.exe');
+      Exec(ExpandConstant('{tmp}\pahkat-service-setup.exe'), '/VERYSILENT /SP- /SUPPRESSMSGBOXES /NORESTART', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+
+      // Run embedded dotnet installer
+      WizardForm.PreparingLabel.Caption := CustomMessage('InstallingDotNetMsg');
+      ExtractTemporaryFile('dotnet5-webinst.exe');
+      Exec(ExpandConstant('{tmp}\dotnet5-webinst.exe'), '-r windowsdesktop -v 5 -a x86', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    finally
+      // restore the original visibility state
+      WizardForm.PreparingLabel.Visible := WasVisible;
+    end;
 end;

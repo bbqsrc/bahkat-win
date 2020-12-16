@@ -34,11 +34,15 @@ jobs:
         with:
           repo: https://pahkat.uit.no/devtools/
           channel: nightly
-          packages: pahkat-uploader, pahkat-windows-cli, libpahkat_rpc
+          packages: pahkat-uploader, pahkat-windows-cli, libpahkat_rpc, dotnet5-webinst
       - name: Move libpahkat_rpc to appropriate place
         run: |
           cp $env:RUNNER_TEMP\pahkat-prefix\pkg\libpahkat_rpc\bin\pahkat_rpc.dll $env:RUNNER_WORKSPACE\divvun-manager-windows\Divvun.Installer\
           cp $env:RUNNER_TEMP\pahkat-prefix\pkg\libpahkat_rpc\bin\pahkat_rpc.dll $env:RUNNER_WORKSPACE\divvun-manager-windows\Divvun.Installer.OneClick\Costura32\
+      - name: Move dotnet5-webinst to appropriate place
+        run: |
+          ls -R $env:RUNNER_TEMP\pahkat-prefix\pkg\dotnet5-webinst
+          cp $env:RUNNER_TEMP\pahkat-prefix\pkg\dotnet5-webinst\bin\dotnet5-webinst.exe $env:RUNNER_WORKSPACE\divvun-manager-windows\
       - name: Acquire Pahkat Service installer (nightly)
         if: ${{ steps.version.outputs.channel == 'nightly' }}
         run: |
